@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "uploadExcelLaunch",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "cds",
+      "command": "cds watch --profile hybrid",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ]
+}

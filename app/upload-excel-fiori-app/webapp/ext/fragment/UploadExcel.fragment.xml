@@ -1,0 +1,56 @@
+<core:FragmentDefinition
+   xmlns = "sap.m"
+   xmlns:core="sap.ui.core"
+   xmlns:u="sap.ui.unified"
+   xmlns:f = "sap.ui.layout.form"
+>
+<Dialog
+  id = "uploadexceldialog"
+  title = "Upload Excel"
+   beforeOpen=".onBeforeOpen"
+    afterClose=".onAfterClose">
+    <content>
+    <VBox id="_IDGenVBox1" alignItems="Center">
+    <f:SimpleForm 
+       id = "SimpleForm"
+       columnsL="1"
+       editable="true"
+       layout= "ColumnLayout"
+    >
+      <f:content>
+
+
+        <u:FileUploader 
+                id="uploader"  
+                fileType="xlsx"
+                core:require = "{handler : 'uploadexcelfioriapp/ext/controller/controller'}"
+                multiple= "false"
+                uploadUrl="/odata/v4/upload-excel-srv/UploadExcel/spreadsheet"
+                fileAllowed=".onFileAllowed"
+                fileEmpty=".onFileEmpty"
+                uploadComplete="handler.onUploadComplete"
+                typeMissmatch=".onTypeMismatch"
+                sendXHR="true"
+                useMultipart="false"
+                placeholder="Choose an excel file..."
+                httpRequestMethod="Put" />
+      </f:content>
+    </f:SimpleForm>
+    </VBox>
+    </content>
+    <beginButton>
+            <Button id="uploadbtn"
+            core:require = "{handler : 'uploadexcelfioriapp/ext/controller/controller' }"
+                text="Upload"
+                press="handler.onUpload"
+                type="Emphasized"
+                enabled="true" />
+        </beginButton>
+        <endButton>
+            <Button id="cancel"
+            core:require = "{handler : 'uploadexcelfioriapp/ext/controller/controller'}"
+                text="Cancel"
+                press="handler.onCancel" />
+        </endButton>
+</Dialog>
+</core:FragmentDefinition>

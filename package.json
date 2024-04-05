@@ -1,0 +1,50 @@
+{
+    "name": "UPLOAD-EXCEL-CAPM",
+    "version": "1.0.0",
+    "description": "A simple CAP project.",
+    "repository": "<Add your repository here>",
+    "license": "UNLICENSED",
+    "private": true,
+    "dependencies": {
+        "@sap/approuter": "^16.2.1",
+        "@sap/cds": "^7.8.0",
+        "@sap/cds-hana": "^2",
+        "@sap/xssec": "^3.6.1",
+        "express": "^4",
+        "mbt": "^1.0.0",
+        "readable-stream": "^4.5.2",
+        "xlsx": "^0.18.5"
+    },
+    "devDependencies": {
+        "@cap-js/sqlite": "^1",
+        "@sap/cds-dk": "^7",
+        "@sap/ux-specification": "^1.120.6",
+        "rimraf": "^3.0.2"
+    },
+    "scripts": {
+        "start": "cds-serve",
+        "watch-upload-excel-fiori-app": "cds watch --open upload-excel-fiori-app/webapp/index.html?sap-ui-xx-viewCache=false",
+        "undeploy": "cf undeploy UPLOAD-EXCEL-CAPM --delete-services --delete-service-keys --delete-service-brokers",
+        "build": "rimraf resources mta_archives && mbt build --mtar archive",
+        "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+    },
+    "cds": {
+        "requires": {
+            "uaa": {
+                "kind": "xsuaa"
+            },
+            "db": {
+                "kind": "hana"
+            },
+            "auth": {
+                "kind": "jwt-auth"
+            }
+        },
+        "hana": {
+            "deploy-format": "hdbtable"
+        }
+    },
+    "sapux": [
+        "app/upload-excel-fiori-app"
+    ]
+}

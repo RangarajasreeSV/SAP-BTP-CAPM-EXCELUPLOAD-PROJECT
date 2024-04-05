@@ -1,0 +1,127 @@
+_schema-version: "3.1"
+ID: UPLOAD-EXCEL-CAPM
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: UPLOAD-EXCEL-CAPM-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: UPLOAD-EXCEL-CAPM-db
+  - name: UPLOAD-EXCEL-CAPM-auth
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+  build-parameters:
+    builder: npm
+- name: UPLOAD-EXCEL-CAPM-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: UPLOAD-EXCEL-CAPM-db
+  parameters:
+    buildpack: nodejs_buildpack
+- name: UPLOAD-EXCEL-CAPM-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: UPLOAD-EXCEL-CAPM-destination-service
+    parameters:
+      content-target: true
+  - name: UPLOAD-EXCEL-CAPM_html_repo_host
+    parameters:
+      service-key:
+        name: UPLOAD-EXCEL-CAPM_html_repo_host-key
+  - name: UPLOAD-EXCEL-CAPM-auth
+    parameters:
+      service-key:
+        name: UPLOAD-EXCEL-CAPM-auth-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: exceluploadapprouter_UPLOAD_EXCEL_CAPM_html_repo_host
+          ServiceInstanceName: UPLOAD-EXCEL-CAPM-html5-app-host-service
+          ServiceKeyName: UPLOAD-EXCEL-CAPM_html_repo_host-key
+          sap.cloud.service: exceluploadapprouter
+        - Authentication: OAuth2UserTokenExchange
+          Name: exceluploadapprouter_UPLOAD_EXCEL_CAPM_auth
+          ServiceInstanceName: UPLOAD-EXCEL-CAPM-auth
+          ServiceKeyName: UPLOAD-EXCEL-CAPM-auth-key
+          sap.cloud.service: exceluploadapprouter
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: UPLOAD-EXCEL-CAPM-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: UPLOAD-EXCEL-CAPM_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - uploadexcelfioriapp.zip
+      name: uploadexcelfioriapp
+      target-path: resources/
+- name: uploadexcelfioriapp
+  type: html5
+  path: app/upload-excel-fiori-app
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    #- npm run build:cf
+    supported-platforms: []
+resources:
+- name: UPLOAD-EXCEL-CAPM-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: UPLOAD-EXCEL-CAPM-auth
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      tenant-mode: dedicated
+      xsappname: UPLOAD-EXCEL-CAPM-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-plan: application
+- name: UPLOAD-EXCEL-CAPM-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: UPLOAD-EXCEL-CAPM-destination-service
+    service-plan: lite
+- name: UPLOAD-EXCEL-CAPM_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: UPLOAD-EXCEL-CAPM-html5-app-host-service
+    service-plan: app-host
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production
